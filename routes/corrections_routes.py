@@ -69,7 +69,7 @@ async def get_corrections_user(user: str, db: Session = Depends(get_db)):
     """
     try:
         corrections = db.query(CorrectionSchema).filter(CorrectionSchema.username == user).all()
-        corrections_models = [Correction(oid=c.oid, username=c.username, label=c.label,pid=c.pdi) for c in corrections]
+        corrections_models = [Correction(oid=c.oid, username=c.username,pid=c.pid, label=c.label) for c in corrections]
         return corrections_models
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {e}")

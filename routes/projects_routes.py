@@ -26,6 +26,26 @@ async def get_projects(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Projects not found")
     return db_projects
 
+
+@project_router.get("/{pid}", response_model=List[Project])
+async def get_projects(pid:int,db: Session = Depends(get_db)):
+    """
+    Get all projects.
+
+    Args:
+        db (Session): The database session.
+
+    Returns:
+        List[Project]: A list of Project objects.
+    """
+    db_projects = db.query(ProjectSchema).filter(ProjectSchema.pid == pid).all()
+    print(db_projects)
+    if not db_projects:
+        raise HTTPException(status_code=404, detail="Projects not found")
+    return db_projects
+
+
+
 @project_router.post("/")
 async def add_project(project:Project, db: Session = Depends(get_db)):
     try:
