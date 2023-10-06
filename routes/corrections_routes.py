@@ -55,8 +55,8 @@ async def post_object_correction(correction: Correction, db: Session = Depends(g
 
 
 
-@corrections_router.get("/{user}/{oid}", response_model=Confirm)
-async def get_is_corrected_user(user: str,oid:str, db: Session = Depends(get_db)):
+@corrections_router.post("/exits/", response_model=Confirm)
+async def post_is_corrected_user(correction: Correction, db: Session = Depends(get_db)):
     """
     Get user history.
 
@@ -68,7 +68,7 @@ async def get_is_corrected_user(user: str,oid:str, db: Session = Depends(get_db)
         List[Correction]: A list of Correction objects.
     """
     try:
-        correction = db.query(CorrectionSchema).filter(CorrectionSchema.username == user, CorrectionSchema.oid == oid).first()
+        correction = db.query(CorrectionSchema).filter(CorrectionSchema.username == correction.username, CorrectionSchema.oid == correction.oid).first()
         if correction is not None:
             return Confirm(response=True, detail="Correction exists.")
         else:
@@ -120,8 +120,7 @@ async def post_comment(comment: Comment, db: Session = Depends(get_db)):
         user_db = db.query(UserSchema).filter(UserSchema.username == comment.username).first()
         if user_db is None:
             return Confirm(response=False, detail="User not found")
-
-        db_comment = CommentSchema(user=comment.username, date=comment.date, msg=comment.msg, oid=comment.oid)
+        db_comment = CommentSchema(username=comment.username, date=comment.date, msg=comment.msg, oid=comment.oid)
         db.add(db_comment)
         db.commit()
         db.refresh(db_comment)
@@ -145,11 +144,13 @@ async def get_comment(oid: str, db: Session = Depends(get_db)):
     Returns:
         List[Comment]: A list of Comment objects.
     """
-    try:
-        comments = db.query(CommentSchema).filter(CommentSchema.oid == oid).all()
-        return comments
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+   
+    comments = db.query(CommentSchema).filter(CommentSchema.oid == oid).all()
+    print(comments)
+    if not comments:
+        raise HTTPException(status_code=404, detail="Comments not found")
+    return comments
+    
 
 
 
