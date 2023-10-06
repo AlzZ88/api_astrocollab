@@ -14,7 +14,7 @@ HOST="localhost:3306" """
 USER="asanchez2017"
 PASSWORD="153alex531"
 
-HOST = "localhost"
+HOST = "172.17.0.1"
 PORT = "5432"
 DATABASE="astrocollab"
 

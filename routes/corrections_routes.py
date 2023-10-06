@@ -45,13 +45,36 @@ async def post_object_correction(correction: Correction, db: Session = Depends(g
         Confirm: A Confirm object indicating successful or failed correction posting.
     """
     try:
-        db_correction = CorrectionSchema(oid=correction.oid, username=correction.user,pid=correction.pid, label=correction.label)
+        db_correction = CorrectionSchema(oid=correction.oid, username=correction.username,pid=correction.pid, label=correction.label)
         db.add(db_correction)
         db.commit()
         db.refresh(db_correction)
         return Confirm(response=True, detail="")
     except Exception as e:
         return Confirm(response=False, detail=f"Internal server error: {e}")
+
+
+
+@corrections_router.get("/{user}/{oid}", response_model=Confirm)
+async def get_is_corrected_user(user: str,oid:str, db: Session = Depends(get_db)):
+    """
+    Get user history.
+
+    Args:
+        user (str): The username.
+        db (Session): The database session.
+
+    Returns:
+        List[Correction]: A list of Correction objects.
+    """
+    try:
+        correction = db.query(CorrectionSchema).filter(CorrectionSchema.username == user, CorrectionSchema.oid == oid).first()
+        if correction is not None:
+            return Confirm(response=True, detail="Correction exists.")
+        else:
+            return Confirm(response=False, detail="Correction does not exist.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
 
 
 

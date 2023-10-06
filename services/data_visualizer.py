@@ -40,12 +40,11 @@ class DataVisualizer:
                     marker='v', label="lim.mag. %s" % labels[fid]
                 )
 
-        ax.set_title(oid)
+        ax.set_title(f"{oid} diff mag lc")
         ax.set_xlabel("MJD")
         ax.set_ylabel("Difference Magnitude")
         ax.legend()
         ax.set_ylim(ax.get_ylim()[::-1])
-        fig.savefig(f'{oid}.png', dpi=300)
 
         plt.savefig(buffer, format='png')
         buffer.seek(0)
@@ -78,65 +77,17 @@ class DataVisualizer:
                     yerr = LC_det[mask].sigmapsf_corr_ext, c = colors[fid], fmt=markers[fid], label = labels[fid])
             
                 
-        ax.set_title(oid)
+        ax.set_title(f"{oid} corrected lc")
         ax.set_xlabel("MJD")
         ax.set_ylabel("Apparent magnitude")
         ax.legend()
         ax.set_ylim(ax.get_ylim()[::-1])
-        fig.savefig(f'{oid}.png', dpi=300)
+        #fig.savefig(f'{oid}.png', dpi=300)
 
         plt.savefig(buffer, format='png')
         buffer.seek(0)
 
         return buffer.read()
-    """     @staticmethod
-    def plot_light_curve(df, title='', period=None):
-        
-        def colormap(i):
-            if i == 1:
-                return '#56e03a'
-            elif i == 2:
-                return '#d42f4b'
-            else:
-                return '#000000'
-        for fid in [1, 2]:
-            fid_df = df[df.fid == fid]
-            if len(fid_df) == 0:
-                continue
-            if period is not None:
-                mjd = (fid_df.mjd % period) / period
-            else:
-                mjd = fid_df.mjd
-            
-            plt.errorbar(
-                mjd,
-                fid_df.magpsf,
-                yerr=fid_df.sigmapsf,
-                fmt='*',
-                c=colormap(fid))
-        plt.gca().invert_yaxis()
-        if period is not None:
-            plt.xlabel(f'Phase (period={period:.3f})')
-        else:
-            plt.xlabel('Date [mjd]')
-        plt.ylabel('Apparent magnitude [mag]')
-        plt.title(title) """
-    """@staticmethod
-    def plotLCFloded(oid,df, period=None):
-
-        buffer = io.BytesIO()
-        fig = plt.figure(figsize=(14, 10))
-        fig.patch.set_facecolor('white')
-        print("1")
-        DataVisualizer.plot_light_curve(df, title=f'Light curve example {oid}', period=period)
-        print("2")
-        #fig = plt.figure(figsize=(14, 25))
-        #fig.patch.set_facecolor('white')
-        fig.savefig(f'{oid}.png', dpi=300)
-        plt.savefig(buffer, format='png')
-        buffer.seek(0)
-
-        return buffer.read() """
     @staticmethod
     def plot_folded_light_curve(oid, lc_det, lc_nondet, period):
         fig, ax = plt.subplots(figsize=(14, 8))
@@ -178,13 +129,11 @@ class DataVisualizer:
                     marker='v', label="lim.mag. %s" % labels[fid]
                 )
 
-        ax.set_title(oid)
+        ax.set_title(f"{oid} lc folded")
         ax.set_xlabel("Phase (period=%.3f)" % period)
         ax.set_ylabel("Difference Magnitude")
         ax.legend()
         ax.set_ylim(ax.get_ylim()[::-1])
-        fig.savefig(f'{oid}_folded.png', dpi=300)
-
         plt.savefig(buffer, format='png')
         buffer.seek(0)
 
@@ -242,10 +191,9 @@ class DataVisualizer:
 
         ax.set_facecolor('black')
 
-        ax.set_title(oid)
+        ax.set_title(f"{oid} Probabilities")
         ax.set_xlabel("Probabilities")
 
-        fig.savefig(f'{oid}_probabilities.png', dpi=300)
         plt.savefig(buffer, format='png')
         buffer.seek(0)
 
