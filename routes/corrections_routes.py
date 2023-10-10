@@ -32,9 +32,9 @@ async def get_corrections(db: Session = Depends(get_db)):
 
 
 
-@corrections_router.post("/", response_model=Confirm)
+""" @corrections_router.post("/", response_model=Confirm)
 async def post_object_correction(correction: Correction, db: Session = Depends(get_db)):
-    """
+    
     Post object correction.
 
     Args:
@@ -43,7 +43,7 @@ async def post_object_correction(correction: Correction, db: Session = Depends(g
 
     Returns:
         Confirm: A Confirm object indicating successful or failed correction posting.
-    """
+   
     try:
         db_correction = CorrectionSchema(oid=correction.oid, username=correction.username,pid=correction.pid, label=correction.label)
         db.add(db_correction)
@@ -51,7 +51,42 @@ async def post_object_correction(correction: Correction, db: Session = Depends(g
         db.refresh(db_correction)
         return Confirm(response=True, detail="")
     except Exception as e:
-        return Confirm(response=False, detail=f"Internal server error: {e}")
+        return Confirm(response=False, detail=f"Internal server error: {e}") """
+
+
+@corrections_router.post("/", response_model=Confirm)
+async def post_object_correction(correction: Correction, db: Session = Depends(get_db)):
+    
+    """ Post object correction.
+
+    Args:
+        correction (Correction): The Correction object containing object and project ID, the username and correction.
+        db (Session): The database session.
+
+    Returns:
+        Confirm: A Confirm object indicating successful or failed correction posting. """
+    existing_correction = db.query(CorrectionSchema).filter(
+        CorrectionSchema.username == correction.username,
+        CorrectionSchema.oid == correction.oid
+    ).first()
+    print(existing_correction)
+    if existing_correction is not None:
+        existing_correction.label = correction.label
+        db.commit()
+        db.refresh(existing_correction)
+        return Confirm(response=True, detail="Correction updated.")
+    
+    else:
+        db_correction = CorrectionSchema(
+            oid=correction.oid,
+            username=correction.username,
+            pid=correction.pid,
+            label=correction.label
+        )
+        db.add(db_correction)
+        db.commit()
+        db.refresh(db_correction)
+        return Confirm(response=True, detail="Correction inserted.")
 
 
 

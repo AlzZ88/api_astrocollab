@@ -63,7 +63,7 @@ class AlerceDataBaseHandler:
 
         Returns:
             pd.DataFrame: Dataframe containing the result of the query.
-        """
+        """ 
         try:
 
             print("[INFO] get pool connection to Alerce")
