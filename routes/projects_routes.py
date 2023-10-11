@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from models.project.project import Project
 from models.confirm.confirm import Confirm
 from schemas.project_sc.project_sc import ProjectSchema
+from schemas.correction_sc.correction_sc import CorrectionSchema
+from sqlalchemy.orm.exc import NoResultFound
 from data.database_handler import get_db
 from sqlalchemy.orm import Session
 from typing import List
@@ -25,6 +27,17 @@ async def get_projects(db: Session = Depends(get_db)):
     if not db_projects:
         raise HTTPException(status_code=404, detail="Projects not found")
     return db_projects
+
+
+
+@project_router.get("/labels/{oid}")
+async def get_project_labels(oid: str, db: Session = Depends(get_db)):
+    try:
+        # Buscar el proyecto que tiene el OID proporcionado
+        project = db.query(ProjectSchema).join(CorrectionSchema).filter(CorrectionSchema.oid == oid).one()
+        return project.labels
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="Project not found")
 
 
 @project_router.get("/{pid}", response_model=List[Project])
