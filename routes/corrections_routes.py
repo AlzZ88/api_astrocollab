@@ -13,6 +13,28 @@ from data.database_handler import get_db
 # Create an APIRouter instance
 corrections_router = APIRouter()
 
+
+@corrections_router.get("/corrected/{pid}/{username}", response_model=List[str])
+async def get_corrections_by_username_and_pid(username: str, pid: int, db: Session = Depends(get_db)):
+    db_corrections = db.query(CorrectionSchema).filter(CorrectionSchema.username == username, CorrectionSchema.pid == pid).all()
+    if not db_corrections:
+        raise HTTPException(status_code=404, detail="Corrections not found for the given username and pid")
+
+    oid_list = [correction.oid for  correction in db_corrections]
+    return oid_list
+
+@corrections_router.get("/noncorrected/{pid}/{username}", response_model=List[str])
+async def get_corrections_by_username_and_pid(username: str, pid: int, db: Session = Depends(get_db)):
+    db_corrections = db.query(CorrectionSchema).filter(CorrectionSchema.pid == pid, CorrectionSchema.username != username).all()
+
+    if not db_corrections:
+        raise HTTPException(status_code=404, detail="Corrections not found for the given username and pid")
+
+    oid_list = [correction.oid for  correction in db_corrections]
+    return oid_list
+
+
+
 @corrections_router.get("/", response_model=List[Correction])
 async def get_corrections(db: Session = Depends(get_db)):
     """
@@ -31,27 +53,6 @@ async def get_corrections(db: Session = Depends(get_db)):
     return db_history
 
 
-
-""" @corrections_router.post("/", response_model=Confirm)
-async def post_object_correction(correction: Correction, db: Session = Depends(get_db)):
-    
-    Post object correction.
-
-    Args:
-        correction (Correction): The Correction object containing object and project ID, the username and correction.
-        db (Session): The database session.
-
-    Returns:
-        Confirm: A Confirm object indicating successful or failed correction posting.
-   
-    try:
-        db_correction = CorrectionSchema(oid=correction.oid, username=correction.username,pid=correction.pid, label=correction.label)
-        db.add(db_correction)
-        db.commit()
-        db.refresh(db_correction)
-        return Confirm(response=True, detail="")
-    except Exception as e:
-        return Confirm(response=False, detail=f"Internal server error: {e}") """
 
 
 @corrections_router.post("/", response_model=Confirm)
@@ -186,6 +187,5 @@ async def get_comment(oid: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Comments not found")
     return comments
     
-
 
 

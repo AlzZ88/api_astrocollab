@@ -75,3 +75,5 @@ async def add_project(project:Project, db: Session = Depends(get_db)):
         return Confirm(response=True, detail="")
     except Exception as e:
         return Confirm(response=False, detail=f"Internal server error: {e}")
+
+
