@@ -7,12 +7,17 @@ from sqlalchemy.ext.declarative import declarative_base
 #DATABASE_URL = "postgresql://username:password@localhost:5432/astrocollab"
 
 #CREDENTIALS
-""" USER="asanchez2017""servicio_movil"
-PASSWORD="153alex531""astrocollab888"
-HOST="localhost:3306" """
+""" 
 
-USER="asanchez2017"
-PASSWORD="153alex531"
+USER="servicio_movil"
+PASSWORD="astrocollaB2023."
+
+
+"""
+
+
+USER="servicio_movil"
+PASSWORD="astrocollaB2023."
 
 HOST = "172.17.0.1"
 PORT = "5432"

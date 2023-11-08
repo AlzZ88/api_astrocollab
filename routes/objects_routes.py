@@ -5,6 +5,7 @@ from data.alerce_database_handler import AlerceDataBaseHandler
 from models.image.image import Image
 from models.magstat.magstat import MagStat
 from models.object.object import ObjectBasic, ObjectLocation
+from models.lc.lc_det import LightCurveDetection, LightCurveNonDetection, LightCurveData
 from services.data_visualizer import DataVisualizer
 from matplotlib import pyplot as plt
 
@@ -67,10 +68,49 @@ async def get_object_diff_mag_lc(id_objeto: str):
         raise HTTPException(status_code=500, detail="Internal server error.")
     else:
         print("[INFO] query successful")
+        # Selecciona las columnas necesarias en lc_det
+        det = det.loc[:, ['fid', 'mjd', 'magpsf', 'sigmapsf']]
+
+
+        # Selecciona las columnas necesarias en lc_nondet
+        non_det = non_det.loc[:, ['fid', 'mjd', 'diffmaglim']]
         print("[INFO] creating graph")
+        print("*"*20)
+        print(det)
+        print("-"*20)
+        print(non_det)
+        print("*"*20)
         graph = DataVisualizer.plot_diff_lc(id_objeto, det, non_det)
         encoded_image_string = base64.b64encode(graph)
         return Image(image=encoded_image_string)
+
+
+
+# Example route to get differential magnitude light curve of an object
+@objects_router.get("/dmlc/info/{id_objeto}", response_model=LightCurveData)
+async def get_object_diff_mag_lc_info(id_objeto: str):
+    try:
+        print("[INFO] request an object from the DB")
+        det, non_det = AlerceDataBaseHandler.fetch_lc_data(id_objeto)
+    except BaseException as e:
+        print(f"[ERROR] {e}")
+        raise HTTPException(status_code=500, detail="Internal server error.")
+    else:
+        print("[INFO] query successful")
+        det = det.loc[:, ['fid', 'mjd', 'magpsf', 'sigmapsf']]
+        non_det = non_det.loc[:, ['fid', 'mjd', 'diffmaglim']]
+
+
+
+
+        det_list = [LightCurveDetection(**row) for _, row in det.iterrows()]
+        non_det_list = [LightCurveNonDetection(**row) for _, row in non_det.iterrows()]
+        
+        # Crea y devuelve un objeto LightCurveData con las listas de detecciones y no detecciones
+        return LightCurveData(detections=det_list, non_detections=non_det_list)
+
+
+
 
 # Example route to get correlated magnitude light curve of an object
 @objects_router.get("/corrlc/{id_objeto}", response_model=Image)

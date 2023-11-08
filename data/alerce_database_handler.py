@@ -35,7 +35,7 @@ class AlerceDataBaseHandler:
             print(f"[ERROR] when create a pool connection {e}")
         else:
             print("[INFO] Pool create!")
-            print(type(self.connection_pool))
+            
         
     @classmethod
     def close_connection_pool(self):

@@ -6,7 +6,7 @@ class ProjectSchema(Base):
     __tablename__ = 'projects'
     pid = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50))
-    description = Column(String(140))
+    description = Column(String(500))
     labels = Column(JSON)
     objects = Column(JSON)
     

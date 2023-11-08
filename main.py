@@ -13,24 +13,41 @@ from starlette.responses import JSONResponse
 app = FastAPI()
 
 
+# Configuración de las políticas de CORS
+origins = [
+    "192.168.6.248",  # Reemplaza con la URL de tu aplicación web
+    "http://astrocollab.inf.udec.cl",
+    "https://astrocollab.inf.udec.cl",
+    # Agrega más orígenes permitidos si es necesario
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Puedes especificar los métodos HTTP permitidos
+    allow_headers=["*"],  # Puedes especificar los encabezados permitidos
+)
+
 # Configurar FastAPI
 @app.on_event("startup")
+
 async def startup_db_client():
     pass
     
     #create_tables()
 
-app.include_router(corrections_router, prefix="/corrections")
-app.include_router(objects_router, prefix="/objects")
-app.include_router(ad_router, prefix="/ads")
-app.include_router(users_router, prefix="/users")
-app.include_router(project_router,prefix="/projects")
+app.include_router(corrections_router, prefix="/api/corrections")
+app.include_router(objects_router, prefix="/api/objects")
+app.include_router(ad_router, prefix="/api/ads")
+app.include_router(users_router, prefix="/api/users")
+app.include_router(project_router,prefix="/api/projects")
 
 
 db_handler = AlerceDataBaseHandler()
 
 
-@app.get("/")
+@app.get("/api/")
 def index():
     return "Astrocollab 1.1.0"
 

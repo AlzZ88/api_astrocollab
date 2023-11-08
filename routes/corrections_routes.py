@@ -33,8 +33,6 @@ async def get_corrections_by_username_and_pid(username: str, pid: int, db: Sessi
     oid_list = [correction.oid for  correction in db_corrections]
     return oid_list
 
-
-
 @corrections_router.get("/", response_model=List[Correction])
 async def get_corrections(db: Session = Depends(get_db)):
     """
@@ -52,6 +50,23 @@ async def get_corrections(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Corrections not found")
     return db_history
 
+
+@corrections_router.get("/comment/", response_model=List[Comment])
+async def get_comments(db: Session = Depends(get_db)):
+    """
+    Get user history.
+
+    Args:
+        user (str): The username.
+        db (Session): The database session.
+
+    Returns:
+        List[HistoryItem]: A list of HistoryItem objects.
+    """
+    db_history = db.query(CommentSchema).all()
+    if not db_history:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    return db_history
 
 
 
@@ -75,7 +90,8 @@ async def post_object_correction(correction: Correction, db: Session = Depends(g
         existing_correction.label = correction.label
         db.commit()
         db.refresh(existing_correction)
-        return Confirm(response=True, detail="Correction updated.")
+        return Confirm(response=True, detail="Correction updated.",user=User(privilege=False,mail="",username="",password=""))
+
     
     else:
         db_correction = CorrectionSchema(
@@ -87,7 +103,8 @@ async def post_object_correction(correction: Correction, db: Session = Depends(g
         db.add(db_correction)
         db.commit()
         db.refresh(db_correction)
-        return Confirm(response=True, detail="Correction inserted.")
+        return Confirm(response=True, detail="Correction inserted.",user=User(privilege=False,mail="",username="",password=""))
+
 
 
 
@@ -106,11 +123,14 @@ async def post_is_corrected_user(correction: Correction, db: Session = Depends(g
     try:
         correction = db.query(CorrectionSchema).filter(CorrectionSchema.username == correction.username, CorrectionSchema.oid == correction.oid).first()
         if correction is not None:
-            return Confirm(response=True, detail="Correction exists.")
+            return Confirm(response=True, detail="Correction exists.",user=User(privilege=False,mail="",username="",password=""))
+
         else:
-            return Confirm(response=False, detail="Correction does not exist.")
+            return Confirm(response=False, detail="Correction does not exist.",user=User(privilege=False,mail="",username="",password=""))
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}",user=User(privilege=False,mail="",username="",password=""))
+
 
 
 
@@ -155,15 +175,17 @@ async def post_comment(comment: Comment, db: Session = Depends(get_db)):
     try:
         user_db = db.query(UserSchema).filter(UserSchema.username == comment.username).first()
         if user_db is None:
-            return Confirm(response=False, detail="User not found")
+            return Confirm(response=False, detail="User not found",user=User(privilege=False,mail="",username="",password=""))
+
         db_comment = CommentSchema(username=comment.username, date=comment.date, msg=comment.msg, oid=comment.oid)
         db.add(db_comment)
         db.commit()
         db.refresh(db_comment)
 
-        return Confirm(response=True, detail="")
+        return Confirm(response=True, detail="",user=User(privilege=user_db.privilege,mail=user_db.mail,username=user_db.username,password=user_db.password))
     except Exception as e:
-        return Confirm(response=False, detail=f"Internal server error {e}")
+        return Confirm(response=False, detail=f"Internal server error {e}",user=User(privilege=False,mail="",username="",password=""))
+
 
 
 
