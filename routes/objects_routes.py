@@ -133,13 +133,15 @@ async def get_object_corr_lc(id_objeto: str):
 async def get_object_magstat(id_objeto: str):
     try:
         print("[INFO] request an object from the DB")
+        
         object_magstatG,object_magstatR = AlerceDataBaseHandler.fetch_lc_magstat(id_objeto)
+        
         
         object_magstatG=object_magstatG.values.tolist()
         object_magstatR= object_magstatR.values.tolist()
-
         print(object_magstatG)
         print(object_magstatR)
+
     except BaseException as e:
         print(f"[ERROR] {e}")
         raise HTTPException(status_code=500, detail="Internal server error.")
